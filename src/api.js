@@ -2,7 +2,6 @@
 
 import axios from "axios"
 import { setupOfflineInterceptor } from "./utils/interceptor" 
-import "./utils/offlineSave"
 
 const api = axios.create ({
   baseURL: import.meta.env.VITE_API_URL,

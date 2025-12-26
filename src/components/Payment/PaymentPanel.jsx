@@ -13,6 +13,7 @@ export default function PaymentPanel({ onCancel, onConfirm, selectedClient }) {
     const totalAmount = useSelector(state => state.cart.items.reduce((sum, item) => sum + item.price * item.quantity, 0))
     const [paymentType, setPaymentType] = useState("Espèces")
     const [confirmationData, setConfirmationData] = useState(null)
+    const [isLoading, setIsLoading] = useState(false)
     const [errorMessage, setErrorMessage] = useState("")
 
     const givenAmount = useSelector(state => state.cart.enteredGivenAmount)
@@ -50,6 +51,7 @@ export default function PaymentPanel({ onCancel, onConfirm, selectedClient }) {
 
         setErrorMessage("")
 
+
         const reste = totalAmount - donné
         setConfirmationData({
             selectedClient,
@@ -62,9 +64,13 @@ export default function PaymentPanel({ onCancel, onConfirm, selectedClient }) {
         })
     }
     
-    // 🛑 Fonction de confirmation harmonisée (gère Online/Offline via Intercepteur)
+    //  Fonction de confirmation harmonisée (gère Online/Offline via Intercepteur)
     const handleConfirm = async () => {
+        if(isLoading) return
         if (!confirmationData) return
+
+        setIsLoading(true)
+        
 
         // 1. Préparation des données de vente
         const saleData = {
@@ -104,7 +110,7 @@ export default function PaymentPanel({ onCancel, onConfirm, selectedClient }) {
             let finalSale;
 
             if (res.data.offline) {
-                // 🛑 SCÉNARIO HORS LIGNE (Réponse de l'intercepteur)
+                //  SCÉNARIO HORS LIGNE (Réponse de l'intercepteur)
                 // L'intercepteur a mis la requête dans pendingRequests.
                 // On enregistre la vente dans notre historique local (`localDB.sales`).
                 await localDB.sales.add(localSale)
@@ -112,7 +118,7 @@ export default function PaymentPanel({ onCancel, onConfirm, selectedClient }) {
                 console.log("Vente enregistrée hors ligne et ajoutée à la file d'attente.")
 
             } else if (res.data.success) {
-                // SCÉNARIO EN LIGNE (Réponse réelle du serveur)
+                
                 finalSale = res.data.sale
                 console.log("Vente réussie sur le serveur.")
                 
@@ -121,7 +127,7 @@ export default function PaymentPanel({ onCancel, onConfirm, selectedClient }) {
                  return
             }
             
-            // 5. Mise à jour de l'UI (commun aux deux scénarios)
+            // 5. Mise à jour de l'UI 
             dispatch(addSale(finalSale))
             onConfirm?.(finalSale)
 
@@ -133,6 +139,8 @@ export default function PaymentPanel({ onCancel, onConfirm, selectedClient }) {
         } catch (err) {
             console.error("Erreur enregistrement vente :", err)
             setErrorMessage("Erreur critique lors de l'enregistrement de la vente.")
+        } finally {
+            setIsLoading(false)
         }
     }
   return (
@@ -245,15 +253,16 @@ export default function PaymentPanel({ onCancel, onConfirm, selectedClient }) {
                 <div className="bg-white rounded-xl p-6 w-[400px] text-center shadow">
                     <h2 className="text-xl font-bold mb-4 text-green-700"> Paiement reussi</h2>
                     <p> <strong>Client :</strong> {confirmationData.selectedClient?.name || "-"}</p>
-                    <p> <strong>Total :</strong> {parseInt(confirmationData.totalAmount).toLocaleString('fr-GN')}</p>
-                    <p> <strong>Versement:</strong> {parseInt(confirmationData.givenAmount).toLocaleString('fr-GN')}</p>
-                    <p> <strong>Reste :</strong> {parseInt(confirmationData.reste).toLocaleString('fr-GN')}</p>
+                    <p> <strong>Total :</strong> {parseInt(confirmationData.totalAmount).toLocaleString('fr-GN')} GNF</p>
+                    <p> <strong>Versement:</strong> {parseInt(confirmationData.givenAmount).toLocaleString('fr-GN')} GNF</p>
+                    <p> <strong>Reste :</strong> {parseInt(confirmationData.reste).toLocaleString('fr-GN')} GNF</p>
                  
                     <button 
                     onClick={handleConfirm}
-                    className="mt-4 px-4 py-2 bg-green-700 text-white rounded"
+                    className={`mt-4 px-4 py-2  text-white rounded  ${isLoading ? "bg-gray-400 cursor-not-allowed" : "bg-green-700 hover:bg-green-800" } `}
+                    disabled={isLoading}
                     >
-                        Terminer
+                         {isLoading ? "Envoi en cours..." : "Confirmer"}
                     </button> 
                 </div>
              </div>

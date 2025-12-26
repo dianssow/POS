@@ -126,10 +126,10 @@ export default function ProductsList({ quantityRef }) {
             </div>
           ) : (
             <img
-              src={`${import.meta.env.VITE_API_URL}/${el.image}`}
+              src={el.image}
               onError={(e) => {
                 e.target.onerror = null
-                e.target.src = '/images/placeholder.jpg'
+                e.target.src = '/placeholder.jpg'
               }}
               alt={currentView === "home" && index=== 0 ? "Catégories"  : (el.name || el.categoryName)}
               className="w-full aspect-square object-cover  rounded-xl hover:scale-105 transition-transform"

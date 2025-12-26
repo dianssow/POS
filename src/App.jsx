@@ -16,6 +16,7 @@ import PayButton from "./components/Payment/PayButton"
 import { saveToWaiting,clearWaiting } from "./features/waitingButton"
 import { toggleWholesaleMode } from "./features/cart"
 import { checkSessionAndSync } from "./utils/shiftManager"
+import { initialDataCaching } from "./utils/cacheManager"
 
 
 
@@ -162,6 +163,12 @@ function App() {
      useEffect(() => {
       dispatch(logout())
      }, [dispatch])
+
+     useEffect(() => {
+      if(navigator.onLine){
+        initialDataCaching()
+      }
+     }, [])
 
      const handleLogout = () => {
       dispatch(logout())

@@ -1,41 +1,110 @@
 import { useEffect, useState } from "react"
 import {useSelector} from "react-redux"
 import api from "../../api";
+import { getSales, getVersements } from "../../utils/dataService";
+import { localDB } from "../../utils/localDB";
 
 function Invoice() {
        const [currentSessionSales, setCurrentSessionSales] = useState([])
+       const [currentSessionVersements, setCurrentSessionVersements] = useState([])
        const [searchTerm, setSearchTerm] = useState("")
        const[selectedSale, setSelectedSale] = useState(null)
        
      const token = useSelector(state => state.loginPage.token)
        const user= useSelector((state) => state.loginPage.user)    
      
-
+useEffect(() => { 
   const fetchSales = async () => {
       try {
-                 const response = await api.get(`/api/sale`, {
-            headers: {
-                Authorization: `Bearer ${token}`
-                  } 
-                })
-
-               const salesData = response.data.sales
-               const current = salesData.filter(sale => sale.shift?.status === "OPEN") 
+           
+               const sales = await getSales()
+               const currentShift = await localDB.shifts
+          .where('status')
+          .equals('OPEN')
+          .first()
+        
+        if (!currentShift) {
+          console.log("Aucune session ouverte")
+          setCurrentSessionSales([])
+          return
+        }
+        
+        // Filtrer les ventes de la session actuelle
+        const current = sales.filter(sale => {
+          // Ventes non synchronisées (offline)
+          if (sale.synced === false) return true
+          
+          // Ventes de la session ouverte
+          return sale.shiftId === currentShift.id || 
+                 sale.shift?.id === currentShift.id ||
+                 sale.shift?.status === "OPEN"
+        })
                 setCurrentSessionSales(current);
 
+         
             } catch (error) {
             console.error("Erreur de recuperation de la vente :", error)
+
+            setCurrentSessionSales([])
                 
             }
     
         }
-        useEffect (() => {  
-        fetchSales()
-     }, [token])
+         fetchSales() 
+    window.addEventListener('online', fetchSales)
+    return () => window.removeEventListener('online', fetchSales)
+         }, []) 
+         const filteredCurrentSales = currentSessionSales.filter((sale) => {if(!searchTerm.trim()) return true
+          return sale.customer?.name?.toLowerCase().includes(searchTerm.toLowerCase())
+         })
 
-     const filteredCurrentSales = currentSessionSales.filter((sale) => {if(!searchTerm.trim()) return true
-      return sale.customer?.name?.toLowerCase().includes(searchTerm.toLowerCase())
-     })
+         useEffect(() => {
+          const fetchVersements = async () => {
+             try {
+           
+           const versements = await getVersements()
+           const currentShift = await localDB.shifts
+          .where('status')
+          .equals('OPEN')
+          .first()
+        
+        if (!currentShift) {
+          console.log("Aucune session ouverte")
+          setCurrentSessionVersements([])
+          return
+        }
+        
+        // Filtrer les ventes de la session actuelle
+        const current = versements.filter(versement => {
+          // Ventes non synchronisées (offline)
+          if (versement.synced === false) return true
+          
+          // Ventes de la session ouverte
+          return versement.shiftId === currentShift.id || 
+                 versement.shift?.id === currentShift.id ||
+                 versement.shift?.status === "OPEN"
+        })
+                setCurrentSessionVersements(current);
+
+         
+            } catch (error) {
+            console.error("Erreur de recuperation de la vente :", error)
+
+            setCurrentSessionVersements([])
+                
+            }
+          }
+          fetchVersements()
+           window.addEventListener("online", fetchVersements)
+           return () => window.removeEventListener("online", fetchVersements)
+
+          }, [])
+          const filteredCurrentVersements = currentSessionVersements.filter((versement) => {if(!searchTerm.trim()) return true
+         return versement.customer?.name?.toLowerCase().includes(searchTerm.toLowerCase())
+          
+         })
+   
+
 
 const handleDelete = async() => {
      if(user.role !== "admin") {
@@ -50,7 +119,11 @@ const handleDelete = async() => {
              } 
           })
           if(response.data.success) {
-              fetchSales()
+              const sales = await getSales()
+              const current = sales.filter(sale => 
+                sale.shift?.status === "OPEN" || sale.synced === false
+              )
+              setCurrentSessionSales(current)
           }
           else {
               console.error("erreur de suppression du Produit", error.response) 
@@ -96,7 +169,7 @@ const handleDelete = async() => {
       </thead>
 
       <tbody>
-        {filteredCurrentSales.map((sale) => (
+        {filteredCurrentSales.map((sale)  => (
         <tr key={sale.id} 
         onClick={() => setSelectedSale(sale)}
         className={` cursor-pointer ${selectedSale?.id === sale.id? 'bg-slate-200 text-slate-950' :  "" }`}
@@ -104,7 +177,18 @@ const handleDelete = async() => {
           <td className="px-4 py-2 border-b text-center">{sale.customer?.name || "--"} </td>
           <td className="px-4 py-2 border-b">{sale.paymentType} </td>
           <td className="px-4 py-2 border-b">{sale.totalAmount.toLocaleString("fr-FR")} </td>
-          <td className="px-4 py-2 border-b">{(sale.createdAt).toLocaleString("fr-FR")} </td>
+          <td className="px-4 py-2 border-b">{new Date(sale.createdAt).toLocaleString("fr-FR")} </td>
+        </tr>
+        ))}
+
+         {filteredCurrentVersements.map((versement)  => (
+        <tr key={versement.id} 
+        className="cursor-pointer bg-orange-100/90 "  
+        >
+          <td className="px-4 py-2 border-b text-center">{versement.customer?.name || "--"} </td>
+          <td className="px-4 py-2 border-b"> Versement </td>
+          <td className="px-4 py-2 border-b">{versement.amount.toLocaleString("fr-FR")} </td>
+          <td className="px-4 py-2 border-b">{new Date(versement.createdAt).toLocaleString("fr-FR")} </td>
         </tr>
         ))}
       </tbody>

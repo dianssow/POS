@@ -15,7 +15,7 @@ async function handleNetworkFailure(error) {
     
     if (req.method !== 'get') {
         
-        console.log(`Offline Interceptor ,Échec réseau détecté pour ${req.url}. Sauvegarde locale...`)
+        console.log("Offline Interceptor ,Échec réseau détecté. Sauvegarde locale...")
 
         // Détecter si la requête a déjà un ID local unique (ventes, mouvements)
         // La vente dans PaymentPanel ajoute déjà l'ID local (uuid) au payload data.
@@ -34,11 +34,15 @@ async function handleNetworkFailure(error) {
 
         try {
             await localDB.pendingRequests.add(pendingRequest)
-            console.log(`Offline Interceptor, Requête ${req.url} ajoutée à pendingRequests.`)
+            console.log("Offline Interceptor, Requête ajoutée à pendingRequests.")
             
             //  Offline Response simulation 
             return Promise.resolve({ 
-                data: { success: true, message: "Requête enregistrée localement pour synchronisation.", offline: true },
+                data: {
+                    success: true, 
+                    message: "Requête enregistrée localement pour synchronisation.",
+                    offline: true
+                     },
                 status: 200, 
                 config: req 
             })

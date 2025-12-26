@@ -30,11 +30,11 @@ function Encaissement() {
       setAmount("")
       setSuccessMessage("Encaissement enregistré")
 
+      setisLoading(false)
       setTimeout(() => {
         setSuccessMessage("")
         setErrorMessage("")
       },5000)
-      setisLoading(false)
     } catch (error) {
       console.error("Erreur Encaissement:", error)
       setErrorMessage("Impossible, Session Fermée")
@@ -65,13 +65,16 @@ function Encaissement() {
             {successMessage && (
               <div className="text-green-400 text-lg mt-auto flex-justify-center items-center">{successMessage}</div>
             )}
-            
+
+          
+            <div>
            <button
            type="submit"
            disabled={isLoading}
-           className={`text-xl mt-10 p-3 rounded-xl ${isLoading ? "bg-gray-400" : "bg-blue-500"} `} >
+           className={`text-xl mt-8 p-3 rounded-xl ${isLoading ? "bg-gray-400" : "bg-blue-500"} `} >
             {isLoading ? "Envoi..." : "Confirmer"}
            </button>
+           </div>
           </form>
                   </div>
                   

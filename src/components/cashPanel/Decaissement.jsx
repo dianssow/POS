@@ -4,7 +4,6 @@ import api from "../../api"
 function Decaissement() {
    
   const [amount, setAmount] = useState("")
-  const [confirmationData, setConfirmationData] = useState(null)
   const[errorMessage, setErrorMessage] = useState("")
   const[successMessage, setSuccessMessage] = useState("")
   const[isLoading, setisLoading] = useState(false)
@@ -40,13 +39,13 @@ function Decaissement() {
       setErrorMessage("Impossible,Session fermée");
       return
     }
-
     setTimeout(()=>{
       setErrorMessage("")
       setSuccessMessage("")
-    } )
+    }, 3000 )
     setisLoading(false)
   }
+
 
   return (
           <div className="flex justify-center ">
@@ -66,16 +65,19 @@ function Decaissement() {
            />
              
               {errorMessage && (
-                <div className="text-red-500 text-lg mt-auto flex justify-center items-center ">{errorMessage}</div>
+                <div className="text-red-500 text-lg m-0 flex justify-center items-center ">{errorMessage}</div>
             )}
 
             {successMessage && (
-              <div className="text-green-400 text-lg mt-auto flex justify-center items-center">{successMessage}</div>
+              <div className="text-green-400 text-lg m-0 flex justify-center items-center">{successMessage}</div>
             )}
-            
+            <div>
            <button
            type="submit"
-           className="text-xl mt-10 p-3 rounded-xl bg-blue-500 ">Confirmer</button>
+           disabled={isLoading}
+           className={`text-xl mt-8 p-3 rounded-xl ${isLoading ? "bg-gray-400" : "bg-blue-500"} `}
+            >{isLoading ? "Envoi..." : "Confirmer"}</button>
+           </div>
           </form>
                   </div>
                   

@@ -9,6 +9,8 @@ export async function saveSaleOffline(sale) {
     ...sale,
     id: localId,
     invoiceNumber,
+    totalAmount,
+    totalGivenAmount,
     synced: false,
     createdAt: new Date().toISOString(),
   };
@@ -25,3 +27,5 @@ export async function saveSaleOffline(sale) {
 
   return offlineSale;
 }
+
+

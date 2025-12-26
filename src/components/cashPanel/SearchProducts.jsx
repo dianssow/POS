@@ -3,6 +3,7 @@ import { useSelector, useDispatch, shallowEqual } from "react-redux";
 import api from "../../api";
 import { addToCart, setEnteredQuantityForPrice, setEnteredQuantityForQuantity,setEnteredBuffer, setSelected } from "../../features/cart";
 import Quantity from "../Quantity";
+import { getCategories, getProducts } from "../../utils/dataService";
 
 
 function SearchProducts() {            
@@ -19,8 +20,9 @@ function SearchProducts() {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await api.get("/api/product")
-        setProducts(response.data.products)
+       const fetchedProducts = await getProducts()
+       setProducts(fetchedProducts || [])
+        
       } catch (error) {
         console.error("Erreur chargement produits", error) 
       } 
