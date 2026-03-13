@@ -4,12 +4,12 @@ import Quantity from "../Quantity"
 import { addSale } from "../../features/sale"
 import api from "../../api.js"
 import { setEnteredGivenAmount, setEnteredPaymentBuffer } from "../../features/cart.js"
-import { localDB } from "../../utils/localDB.js" // IndexedDB via Dexie
+import { localDB } from "../../utils/localDB.js" 
 import { v4 as uuidv4 } from "uuid"
 
 export default function PaymentPanel({ onCancel, onConfirm, selectedClient }) {
 
-    // Variables d'état et Redux (inchangées)
+    // States Variables  and Redux 
     const totalAmount = useSelector(state => state.cart.items.reduce((sum, item) => sum + item.price * item.quantity, 0))
     const [paymentType, setPaymentType] = useState("Espèces")
     const [confirmationData, setConfirmationData] = useState(null)
@@ -21,7 +21,6 @@ export default function PaymentPanel({ onCancel, onConfirm, selectedClient }) {
     const token = useSelector(state => state.loginPage.token)
     const dispatch = useDispatch()
     
-    // handleValidate reste inchangé
     const handleValidate = () => {
         if (totalAmount < 0 && paymentType !== "Retour") {
             setErrorMessage("Sélectionnez le bon type de payment")

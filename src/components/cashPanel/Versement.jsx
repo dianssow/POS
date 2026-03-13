@@ -54,7 +54,12 @@ function Versement() {
       type: "ENC",
       method: "Versement",
       customerId:selectedCustomer.id,
-      customerName: selectedCustomer.name,
+      customer:{
+        id: selectedCustomer.id,
+        name: selectedCustomer.name,
+        adress: selectedCustomer.address || "",
+        number: selectedCustomer.number || "",
+      },
       amount:Number(amount),
       motif: motif || null,
       synced: false, 

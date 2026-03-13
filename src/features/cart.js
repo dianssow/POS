@@ -90,8 +90,13 @@ export const cartSlice = createSlice({
         state.isReturnMode = !state.isReturnMode;
         },
         toggleWholesaleMode: (state) => {
-        state.isWholesaleMode = !state.isWholesaleMode;
-}
+        state.isWholesaleMode = !state.isWholesaleMode;   
+        },
+
+        setItems: (state, action) => {
+            state.items = action.payload
+            state.selected = null
+        }
         
     }
 })
@@ -100,5 +105,5 @@ export const cartSlice = createSlice({
 
 
 
-export const {addToCart,updateQuantity,setSelected, clearCart, removeFromCart,setEnteredQuantityForQuantity,setEnteredQuantityForPrice, setEnteredBuffer,setEnteredGivenAmount, toggleReturnMode, toggleWholesaleMode,  setEnteredPaymentBuffer} = cartSlice.actions
+export const {addToCart,updateQuantity,setSelected, clearCart, removeFromCart,setEnteredQuantityForQuantity,setEnteredQuantityForPrice, setEnteredBuffer,setEnteredGivenAmount, toggleReturnMode, toggleWholesaleMode,  setEnteredPaymentBuffer, setItems} = cartSlice.actions
 export default cartSlice.reducer

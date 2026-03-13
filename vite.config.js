@@ -20,7 +20,7 @@ export default defineConfig({
       // Configuration Manifest
       manifest: {
         name: 'GAP Caisse',
-        short_name: 'GAP',
+        short_name: 'GAP Caisse',
         theme_color: '#ffffff',
         icons: [
           { src: '/pwa-192x192.png', sizes: '192x192', type: 'image/png' },
